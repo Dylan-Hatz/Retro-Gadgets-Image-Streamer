@@ -13,32 +13,29 @@ app.get('/', async (req, res) => {
     console.log(req.ip)
     console.log(decodeURI(req.query.url))
     Jimp.read(decodeURI(req.query.url), function (err, image) {
-        image=image.scale(0.1);
+        image=image.resize(width, height);
 	console.log(width, height)
 	console.log(image.bitmap.width, image.bitmap.height)
 	console.log(image.getWidth(), image.getHeight())
 	image=image.rotate(-90)
 	image=image.flip(true,false)
-    console.log(err)
-    let result = {};
-    result.height=image.getHeight();
-    result.width=image.getWidth();
-    result.pixels={};
-    //result += image.getHeight() + ", " + image.getWidth() + ", ";
-
+    image.quality(100)
+    // image=image.dither565()
+    // image=image.normalize()
+        console.log(err)
+        result += image.getHeight() + ", " + image.getWidth() + ", ";
 
 
 	image.scan(0, 0, image.bitmap.width, image.bitmap.height, function(x, y, idx) {
 	  let red = this.bitmap.data[idx + 0];
-	  let green = this.bitmap.data[idx + 1];
-	  let blue = this.bitmap.data[idx + 2];
+	  let blue = this.bitmap.data[idx + 1];
+	  let green = this.bitmap.data[idx + 2];
 	  let alpha = this.bitmap.data[idx + 3];
-      result.pixels[x][y] = {red,green,blue,alpha};
-	//   result += + red + ", " + blue + ", " + green + ", " + alpha + ", ";
+	  result += + red + ", " + blue + ", " + green + ", " + alpha + ", ";
 	});
 
-        // console.log(result.substring(0, result.length - 2).length)
-        res.send(JSON.stringify(result));
+        console.log(result.substring(0, result.length - 2).length)
+        res.send(result.substring(0, result.length - 2));
     });
 })
 
