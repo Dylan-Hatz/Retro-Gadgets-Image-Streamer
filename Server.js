@@ -17,7 +17,10 @@ app.get('/', async (req, res) => {
         console.log(err)
         let xscalefactor = width/image.getWidth();
         let yscalefactor = height/image.getHeight();
-        let scaledx
+        console.log(image.getWidth()/image.getHeight())
+	console.log(image.getWidth())
+	console.log(image.getHeight())
+	let scaledx
         let scaledy
         if (xscalefactor > yscalefactor) {
             scaledx = image.getWidth()*yscalefactor
@@ -26,22 +29,28 @@ app.get('/', async (req, res) => {
             scaledx = image.getWidth()*xscalefactor
             scaledy = image.getHeight()*xscalefactor
         }
-        image=image.resize(scaledx,scaledy)
-
+        image=image.normalize();
+        image=image.dither565();
+        image=image.resize(scaledx,scaledy, Jimp.RESIZE_NEAREST_NEIGHBOR);
+	image.quality(100)
         result += image.getHeight() + ", " + image.getWidth() + ", ";
 
-        for (let y = 0; y < image.getHeight(); y++) {
-            for (let x = 0; x < image.getWidth(); x++) {
-                let pixel = image.getPixelColor(x, y); // returns the colour of that pixel e.g. 0xFFFFFFFF
-                let hexPixel = pixel.toString(16);
-                let red = parseInt(hexPixel.substring(0, 2), 16);
-                let blue = parseInt(hexPixel.substring(2, 4), 16);
-                let green = parseInt(hexPixel.substring(4, 6), 16);
-                let alpha = parseInt(hexPixel.substring(6, 8), 16);
-                
-                result += + red + ", " + blue + ", " + green + ", " + alpha + ", ";
-            }
-        }
+
+
+	image.scan(0, 0, image.bitmap.width, image.bitmap.height, function(x, y, idx) {
+	  // x, y is the position of this pixel on the image
+	  // idx is the position start position of this rgba tuple in the bitmap Buffer
+	  // this is the image
+	
+	  var red = this.bitmap.data[idx + 0];
+	  var green = this.bitmap.data[idx + 1];
+	  var blue = this.bitmap.data[idx + 2];
+	  var alpha = this.bitmap.data[idx + 3];
+	  result += + red + ", " + blue + ", " + green + ", " + alpha + ", ";
+	  // rgba values run from 0 - 255
+	  // e.g. this.bitmap.data[idx] = 0; // removes red from this pixel
+	});
+
         console.log(result.substring(0, result.length - 2).length)
         res.send(result.substring(0, result.length - 2));
     });
