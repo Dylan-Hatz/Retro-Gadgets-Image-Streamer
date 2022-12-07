@@ -2,17 +2,14 @@ local vid:VideoChip=gdt.VideoChip0
 local net:Wifi=gdt.Wifi0
 local screenheight=vid.Height
 local screenwidth=vid.Width
-
-local server="http://localhost:3000"
-local url = "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg"
+local server="http://172.19.62.40:3000"
+local url = "https://picsum.photos/"..(screenwidth*2).."/"..(screenheight*2)..""
 local widthmessage = "&width="..screenwidth
 local heightmessage = "&height="..screenheight
 
 handle=net:WebGet(server.."?url="..url..widthmessage..heightmessage)
-
-
 while net:GetWebDownloadProgress(handle)<100 do
-	sleep(0.5)
+  sleep(0.5)
 end
 print("download complete")
 
